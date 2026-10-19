@@ -1,0 +1,33 @@
+name: Build RecLite (Windows 7+)
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+env:
+  FFMPEG_VERSION: 6.1.1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar compilador MinGW
+        run: sudo apt-get update && sudo apt-get install -y mingw-w64 unzip
+      - name: Compilar RecLite.exe
+        run: |
+          mkdir dist
+          x86_64-w64-mingw32-g++ -O2 -s -static -static-libgcc -static-libstdc++ -mwindows \
+            -fno-exceptions -fno-rtti -D_WIN32_WINNT=0x0601 -DWINVER=0x0601 -DUNICODE -D_UNICODE \
+            src/main.cpp -o dist/RecLite.exe \
+            -lole32 -luuid -lgdi32 -luser32 -lshell32 -lwinmm -ladvapi32
+      - name: Descargar ffmpeg
+        run: |
+          curl -L -o ff.zip "https://github.com/GyanD/codexffmpeg/releases/download/${FFMPEG_VERSION}/ffmpeg-${FFMPEG_VERSION}-essentials_build.zip"
+          unzip -j ff.zip '*/bin/ffmpeg.exe' -d dist
+      - name: Leeme
+        run: cp LEEME.md dist/LEEME.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RecLite
+          path: dist
