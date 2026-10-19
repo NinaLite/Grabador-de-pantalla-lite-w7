@@ -1,0 +1,1 @@
+# Grabador-de-pantalla-lite-w7
